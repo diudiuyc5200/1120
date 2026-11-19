@@ -2,7 +2,7 @@ menu "Baseband Security Guard Configuration"
 
 config BBG
        bool "Enable Baseband Guard (Anti-Format)" 
-       default y
+       default n
        depends on SECURITY
        help
           An Android baseband anti-formatting protector 
