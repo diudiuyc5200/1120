@@ -1432,7 +1432,8 @@ static int fg_get_property(struct power_supply *psy, enum power_supply_property 
 		val->intval *= 1000;
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_MAX:
-			val->intval = 4450000;
+			val->intval = 4400000;
+		break;
 	case POWER_SUPPLY_PROP_AUTHENTIC:
 		val->intval = bq->verify_digest_success;
 		break;
