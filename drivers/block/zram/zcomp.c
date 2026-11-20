@@ -157,10 +157,24 @@ int zcomp_decompress(struct zcomp_strm *zstrm,
 		const void *src, unsigned int src_len, void *dst)
 {
 	unsigned int dst_len = PAGE_SIZE;
+	int ret;
 
-	return crypto_comp_decompress(zstrm->tfm,
-			src, src_len,
-			dst, &dst_len);
+	ret = crypto_comp_decompress(zstrm->tfm, src, src_len, dst, &dst_len);
+	if (unlikely(ret))
+		return ret;
+
+	/*
+	 * Never hand a partially written page back to the faulting task: the
+	 * untouched tail still holds the previous owner's data, which lands in
+	 * the caller's address space as silent heap corruption.
+	 */
+	if (unlikely(dst_len != PAGE_SIZE)) {
+		pr_err_ratelimited("zram: short decompression: %u of %lu bytes\n",
+				   dst_len, (unsigned long)PAGE_SIZE);
+		return -EIO;
+	}
+
+	return 0;
 }
 
 int zcomp_cpu_up_prepare(unsigned int cpu, struct hlist_node *node)
